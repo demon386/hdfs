@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"strings"
 )
 
@@ -24,7 +25,18 @@ func NewHDFS() HDFS {
 	}
 }
 
+func extractHDFSPrefix(path string) string {
+	re, _ := regexp.Compile(`(hdfs:///*.*?)/.*`)
+	result := re.FindStringSubmatch(path)
+	if len(result) == 2 {
+		return result[1]
+	} else {
+		return ""
+	}
+}
+
 func (s HDFS) Ls(inputPath string) []string {
+	hdfsPrefix := extractHDFSPrefix(inputPath)
 	log.Printf("ls: %s\n", inputPath)
 	output := s.Exec("fs", "-ls", inputPath)
 	outputSplit := strings.Split(output, "\n")
@@ -35,7 +47,8 @@ func (s HDFS) Ls(inputPath string) []string {
 			continue
 		}
 		split := strings.Fields(line)
-		files = append(files, split[len(split)-1])
+		fullPath := hdfsPrefix + split[len(split)-1]
+		files = append(files, fullPath)
 	}
 	return files
 }
