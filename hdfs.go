@@ -43,7 +43,7 @@ func (s HDFS) Ls(inputPath string) []string {
 	files := []string{}
 	for _, line := range outputSplit {
 		line = strings.TrimSpace(line)
-		if !strings.HasPrefix(line, "-") || line == "" {
+		if !(strings.HasPrefix(line, "-") || strings.HasPrefix(line, "d")) || line == "" {
 			continue
 		}
 		split := strings.Fields(line)
